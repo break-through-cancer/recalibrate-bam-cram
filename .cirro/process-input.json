@@ -1,0 +1,11 @@
+{
+  "read_from_cache": true,
+  "write_to_cache": true,
+  "outdir": "$.params.dataset.s3|/data/",
+  "ref": "$.dataset.params.ref",
+  "ref_fasta": "$.dataset.params.ref_fasta",
+  "ref_fai": "$.dataset.params.ref_fai",
+  "ref_dict": "$.dataset.params.ref_dict",
+  "dbsnp": "$.dataset.params.dbsnp",
+  "dbsnp_idx": "$.dataset.params.dbsnp_idx"
+}

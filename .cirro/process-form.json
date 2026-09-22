@@ -1,0 +1,57 @@
+{
+  "form": {
+    "title": "BQSR (BaseRecalibrator + ApplyBQSR)",
+    "type": "object",
+    "properties": {
+      "ref": {
+        "title": "Reference genome",
+        "type": "string",
+        "enum": ["hg38", "hg19"],
+        "default": "hg38"
+      },
+      "ref_fasta": {
+        "title": "Reference FASTA",
+        "type": "string",
+        "multiple": false,
+        "pathType": "reference",
+        "file": "**/*",
+        "default": "s3://broad-references/hg38/v0/Homo_sapiens_assembly38.fasta"
+      },
+      "ref_fai": {
+        "title": "Reference FASTA index",
+        "type": "string",
+        "multiple": false,
+        "pathType": "reference",
+        "file": "**/*",
+        "default": "s3://broad-references/hg38/v0/Homo_sapiens_assembly38.fasta.fai"
+      },
+      "ref_dict": {
+        "title": "Reference sequence dictionary",
+        "type": "string",
+        "multiple": false,
+        "pathType": "reference",
+        "file": "**/*",
+        "default": "s3://broad-references/hg38/v0/Homo_sapiens_assembly38.dict"
+      },
+      "dbsnp": {
+        "title": "dbSNP VCF",
+        "description": "Known-sites VCF used by BaseRecalibrator to mask real variation from the error model.",
+        "type": "string",
+        "multiple": false,
+        "pathType": "reference",
+        "file": "**/*",
+        "default": "s3://broad-references/hg38/v0/Homo_sapiens_assembly38.dbsnp138.vcf"
+      },
+      "dbsnp_idx": {
+        "title": "dbSNP index",
+        "type": "string",
+        "multiple": false,
+        "pathType": "reference",
+        "file": "**/*",
+        "default": "s3://broad-references/hg38/v0/Homo_sapiens_assembly38.dbsnp138.vcf.idx"
+      }
+    },
+    "required": ["ref", "ref_fasta", "ref_fai", "ref_dict", "dbsnp", "dbsnp_idx"]
+  },
+  "ui": {}
+}
