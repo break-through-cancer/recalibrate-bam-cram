@@ -79,7 +79,7 @@ with open("!{ref_dict}") as fh:
     sequence_tuples = []
     for line in fh:
         if line.startswith("@SQ"):
-            fields = line.split("\t")
+            fields = line.split("\\t")
             name = fields[1].split("SN:")[1]
             length = int(fields[2].split("LN:")[1])
             sequence_tuples.append((name, length))
@@ -107,11 +107,11 @@ for name, length in sequence_tuples[1:]:
 groups.append(current)
 
 with open("sequence_grouping.tsv", "w") as fh:
-    fh.write("\n".join("\t".join(g) for g in groups))
+    fh.write("\\n".join("\\t".join(g) for g in groups))
 
 groups_with_unmapped = groups + [["unmapped"]]
 with open("sequence_grouping_with_unmapped.tsv", "w") as fh:
-    fh.write("\n".join("\t".join(g) for g in groups_with_unmapped))
+    fh.write("\\n".join("\\t".join(g) for g in groups_with_unmapped))
 CODE
 
     test -s sequence_grouping.tsv
