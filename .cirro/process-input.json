@@ -7,5 +7,6 @@
   "ref_fai": "$.dataset.params.ref_fai",
   "ref_dict": "$.dataset.params.ref_dict",
   "dbsnp": "$.dataset.params.dbsnp",
-  "dbsnp_idx": "$.dataset.params.dbsnp_idx"
+  "dbsnp_idx": "$.dataset.params.dbsnp_idx",
+  "output_format": "$.dataset.params.output_format"
 }

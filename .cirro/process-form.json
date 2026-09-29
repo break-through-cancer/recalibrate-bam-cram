@@ -49,9 +49,17 @@
         "pathType": "reference",
         "file": "**/*",
         "default": "s3://broad-references/hg38/v0/Homo_sapiens_assembly38.dbsnp138.vcf.idx"
+      },
+      "output_format": {
+        "title": "Output format",
+        "description": "Container format for the recalibrated output. CRAM is smaller (reference-based compression + a dedicated quality-score codec) but costs more CPU to read/write; BAM is larger but cheaper to encode/decode. Applies to every sample in the run.",
+        "type": "string",
+        "enum": ["cram", "bam"],
+        "enumNames": ["CRAM (smaller, more CPU)", "BAM (larger, less CPU)"],
+        "default": "cram"
       }
     },
-    "required": ["ref", "ref_fasta", "ref_fai", "ref_dict", "dbsnp", "dbsnp_idx"]
+    "required": ["ref", "ref_fasta", "ref_fai", "ref_dict", "dbsnp", "dbsnp_idx", "output_format"]
   },
   "ui": {}
 }
