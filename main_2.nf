@@ -25,7 +25,7 @@
  * per GATK's own team on the Broad forum). Do not substitute the two kinds
  * of interval list for one another.
  *
- * Two intentional deviations from the reference WDL, since our upstream
+ * One intentional deviation from the reference WDL, since our upstream
  * CRAMs come from Sarek's markduplicates stage rather than Broad's own
  * uBAM -> MergeBamAlignment ingestion:
  *   - no --use-original-qualities: that flag recalibrates from the OQ tag,
@@ -34,11 +34,15 @@
  *     CRAMs don't carry an OQ tag on a first-pass BQSR, so turning this on
  *     would recalibrate against a tag that isn't there. Confirm your CRAM
  *     provenance before adding it.
- *   - no --static-quantized-quals 10/20/30: that's a lossy quality-binning
- *     step purely for storage-size reduction in Broad's production
- *     pipeline, not required for correctness. Add it deliberately if you
- *     want the smaller files, not just because "the reference pipeline has
- *     it."
+ *
+ * --static-quantized-quals 10/20/30 IS included (unlike an earlier revision
+ * of this file): without it, ApplyBQSR emits full-precision recalibrated
+ * quality scores -- much higher entropy per base than Sarek's original
+ * (often pre-binned) qualities -- which was bloating recalibrated CRAMs to
+ * 1.3-3.5x the size of the markduplicates input. This is the same binning
+ * Broad's own WARP/Terra pipeline applies, per the published Functional
+ * Equivalence spec (Regier et al. 2018); GATK's own docs say it has no
+ * noticeable effect on germline variant discovery at these levels.
  *
  * This is main_2.nf -- an alternate, scatter/gathered version kept
  * side-by-side with the original single-shot main.nf for comparison before
@@ -226,6 +230,7 @@ process GATK4_APPLYBQSR {
         -I !{cram} \
         -R !{ref_fasta} \
         --bqsr-recal-file !{recal_table} \
+        --static-quantized-quals 10 --static-quantized-quals 20 --static-quantized-quals 30 \
         !{interval_args} \
         -O !{sample_id}.!{group_tag}.recal.cram \
         --tmp-dir .
