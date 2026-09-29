@@ -1,0 +1,67 @@
+Sep-28 15:04:48.256 [main] DEBUG nextflow.cli.Launcher - $> nextflow run main_2.nf
+Sep-28 15:04:48.309 [main] DEBUG nextflow.cli.CmdRun - N E X T F L O W  ~  version 25.10.0
+Sep-28 15:04:48.426 [main] DEBUG nextflow.plugin.PluginsFacade - Setting up plugin manager > mode=prod; embedded=false; plugins-dir=/Users/jenc/.nextflow/plugins; core-plugins: nf-amazon@3.4.1,nf-azure@1.20.2,nf-cloudcache@0.5.0,nf-codecommit@0.5.0,nf-console@1.3.0,nf-google@1.23.3,nf-k8s@1.2.2,nf-tower@1.17.1,nf-wave@1.16.1
+Sep-28 15:04:48.446 [main] INFO  o.pf4j.DefaultPluginStatusProvider - Enabled plugins: []
+Sep-28 15:04:48.447 [main] INFO  o.pf4j.DefaultPluginStatusProvider - Disabled plugins: []
+Sep-28 15:04:48.449 [main] INFO  org.pf4j.DefaultPluginManager - PF4J version 3.12.0 in 'deployment' mode
+Sep-28 15:04:48.461 [main] DEBUG nextflow.util.RetryConfig - Missing nextflow session - using default retry config
+Sep-28 15:04:48.575 [main] INFO  org.pf4j.AbstractPluginManager - No plugins
+Sep-28 15:04:48.576 [main] DEBUG nextflow.plugin.PluginsFacade - Plugins default=[]
+Sep-28 15:04:48.576 [main] DEBUG nextflow.plugin.PluginsFacade - Plugins resolved requirement=[]
+Sep-28 15:04:48.590 [main] DEBUG n.secret.LocalSecretsProvider - Secrets store: /Users/jenc/.nextflow/secrets/store.json
+Sep-28 15:04:48.596 [main] DEBUG nextflow.secret.SecretsLoader - Discovered secrets providers: [nextflow.secret.LocalSecretsProvider@57b75756] - activable => nextflow.secret.LocalSecretsProvider@57b75756
+Sep-28 15:04:48.607 [main] DEBUG nextflow.cli.CmdRun - Applied DSL=2 from script declaration
+Sep-28 15:04:48.622 [main] DEBUG nextflow.cli.CmdRun - Launching `main_2.nf` [amazing_boltzmann] DSL2 - revision: 421155e615
+Sep-28 15:04:48.674 [main] DEBUG nextflow.Session - Session UUID: 2e0830b1-9a83-4c9b-b3d9-7e818c5969a0
+Sep-28 15:04:48.675 [main] DEBUG nextflow.Session - Run name: amazing_boltzmann
+Sep-28 15:04:48.675 [main] DEBUG nextflow.Session - Executor pool size: 12
+Sep-28 15:04:48.682 [main] DEBUG nextflow.file.FilePorter - File porter settings maxRetries=3; maxTransfers=50; pollTimeout=null
+Sep-28 15:04:48.686 [main] DEBUG nextflow.util.ThreadPoolBuilder - Creating thread pool 'FileTransfer' minSize=10; maxSize=36; workQueue=LinkedBlockingQueue[-1]; allowCoreThreadTimeout=false
+Sep-28 15:04:48.791 [main] DEBUG nextflow.cli.CmdRun - 
+  Version: 25.10.0 build 10289
+  Created: 22-10-2025 16:26 UTC (12:26 EDT)
+  System: Mac OS X 15.7.7
+  Runtime: Groovy 4.0.28 on Java HotSpot(TM) 64-Bit Server VM 20.0.2+9-78
+  Encoding: UTF-8 (UTF-8)
+  Process: 99928@wm718-194 [10.144.118.238]
+  CPUs: 12 - Mem: 32 GB (79.2 MB) - Swap: 15 GB (682.3 MB)
+Sep-28 15:04:48.809 [main] DEBUG nextflow.Session - Work-dir: /Users/jenc/Desktop/pipelines/recalibrate-bam-cram/work [Mac OS X]
+Sep-28 15:04:48.810 [main] DEBUG nextflow.Session - Script base path does not exist or is not a directory: /Users/jenc/Desktop/pipelines/recalibrate-bam-cram/bin
+Sep-28 15:04:48.817 [main] DEBUG nextflow.executor.ExecutorFactory - Extension executors providers=[]
+Sep-28 15:04:48.825 [main] DEBUG nextflow.Session - Observer factory (v2): LinObserverFactory
+Sep-28 15:04:48.827 [main] DEBUG nextflow.Session - Observer factory (v2): DefaultObserverFactory
+Sep-28 15:04:48.854 [main] DEBUG nextflow.cache.CacheFactory - Using Nextflow cache factory: nextflow.cache.DefaultCacheFactory
+Sep-28 15:04:48.862 [main] DEBUG nextflow.util.CustomThreadPool - Creating default thread pool > poolSize: 13; maxThreads: 1000
+Sep-28 15:04:48.910 [main] DEBUG nextflow.Session - Session start
+Sep-28 15:04:49.710 [main] DEBUG nextflow.script.ScriptRunner - > Launching execution
+Sep-28 15:04:49.794 [main] WARN  nextflow.script.ScriptBinding - Access to undefined parameter `bqsr_runs` -- Initialise it to a default value eg. `params.bqsr_runs = some_value`
+Sep-28 15:04:49.800 [main] DEBUG nextflow.script.ScriptRunner - Parsed script files:
+  Script_220e8aef71682f36: /Users/jenc/Desktop/pipelines/recalibrate-bam-cram/main_2.nf
+Sep-28 15:04:49.800 [main] DEBUG nextflow.Session - Session aborted -- Cause: params.bqsr_runs is empty -- did the Cirro preprocess.py hook run? (see preprocess.py)
+Sep-28 15:04:49.807 [main] DEBUG n.trace.WorkflowStatsObserver - Workflow completed > WorkflowStats[succeededCount=0; failedCount=0; ignoredCount=0; cachedCount=0; pendingCount=0; submittedCount=0; runningCount=0; retriesCount=0; abortedCount=0; succeedDuration=0ms; failedDuration=0ms; cachedDuration=0ms;loadCpus=0; loadMemory=0; peakRunning=0; peakCpus=0; peakMemory=0; ]
+Sep-28 15:04:49.940 [main] ERROR nextflow.cli.Launcher - @unknown
+nextflow.exception.WorkflowScriptErrorException: params.bqsr_runs is empty -- did the Cirro preprocess.py hook run? (see preprocess.py)
+	at org.codehaus.groovy.vmplugin.v8.IndyInterface.fromCache(IndyInterface.java:321)
+	at nextflow.Nextflow.error(Nextflow.groovy:244)
+	at org.codehaus.groovy.vmplugin.v8.IndyInterface.fromCache(IndyInterface.java:321)
+	at Script_220e8aef71682f36$_runScript_closure6$_closure27.doCall(Script_220e8aef71682f36:270)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:578)
+	at org.codehaus.groovy.reflection.CachedMethod.invoke(CachedMethod.java:343)
+	at groovy.lang.MetaMethod.doMethodInvoke(MetaMethod.java:328)
+	at org.codehaus.groovy.runtime.metaclass.ClosureMetaClass.invokeMethod(ClosureMetaClass.java:280)
+	at groovy.lang.MetaClassImpl.invokeMethod(MetaClassImpl.java:1007)
+	at groovy.lang.Closure.call(Closure.java:433)
+	at groovy.lang.Closure.call(Closure.java:412)
+	at nextflow.script.WorkflowDef.run0(WorkflowDef.groovy:205)
+	at nextflow.script.WorkflowDef.run(WorkflowDef.groovy:189)
+	at nextflow.script.BindableDef.invoke_a(BindableDef.groovy:51)
+	at nextflow.script.BaseScript.run0(BaseScript.groovy:249)
+	at nextflow.script.BaseScript.run(BaseScript.groovy:260)
+	at nextflow.script.parser.v1.ScriptLoaderV1.runScript(ScriptLoaderV1.groovy:246)
+	at nextflow.script.parser.v1.ScriptLoaderV1.runScript(ScriptLoaderV1.groovy)
+	at nextflow.script.ScriptRunner.run(ScriptRunner.groovy:246)
+	at nextflow.script.ScriptRunner.execute(ScriptRunner.groovy:139)
+	at nextflow.cli.CmdRun.run(CmdRun.groovy:428)
+	at nextflow.cli.Launcher.run(Launcher.groovy:515)
+	at nextflow.cli.Launcher.main(Launcher.groovy:675)
