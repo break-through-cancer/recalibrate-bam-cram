@@ -96,10 +96,19 @@ process GATK4_APPLYBQSR {
     # run over the full genome + unmapped reads. Restricting it silently
     # drops any read outside the interval from the output (nf-core/sarek
     # #1772; confirmed anti-pattern per GATK's own team on the Broad forum).
+    #
+    # --static-quantized-quals 10/20/30: without this, ApplyBQSR emits
+    # full-precision recalibrated quality scores -- much higher entropy per
+    # base than the sequencer's original (often pre-binned) qualities, which
+    # bloats CRAM size several-fold. This 3-level binning is what Broad's own
+    # WARP/Terra pipeline does too, per the published Functional Equivalence
+    # spec (Regier et al. 2018), and GATK's own docs say it has no
+    # noticeable effect on germline variant discovery at these levels.
     gatk --java-options "-Xmx${java_mem_mb}m" ApplyBQSR \
         -I !{cram} \
         -R !{ref_fasta} \
         --bqsr-recal-file !{recal_table} \
+        --static-quantized-quals 10 --static-quantized-quals 20 --static-quantized-quals 30 \
         -O !{sample_id}.recal.cram \
         --tmp-dir .
 

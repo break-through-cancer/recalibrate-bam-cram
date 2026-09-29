@@ -25,7 +25,7 @@
  * per GATK's own team on the Broad forum). Do not substitute the two kinds
  * of interval list for one another.
  *
- * Two intentional deviations from the reference WDL, since our upstream
+ * One intentional deviation from the reference WDL, since our upstream
  * CRAMs come from Sarek's markduplicates stage rather than Broad's own
  * uBAM -> MergeBamAlignment ingestion:
  *   - no --use-original-qualities: that flag recalibrates from the OQ tag,
@@ -34,11 +34,15 @@
  *     CRAMs don't carry an OQ tag on a first-pass BQSR, so turning this on
  *     would recalibrate against a tag that isn't there. Confirm your CRAM
  *     provenance before adding it.
- *   - no --static-quantized-quals 10/20/30: that's a lossy quality-binning
- *     step purely for storage-size reduction in Broad's production
- *     pipeline, not required for correctness. Add it deliberately if you
- *     want the smaller files, not just because "the reference pipeline has
- *     it."
+ *
+ * --static-quantized-quals 10/20/30 IS included (unlike an earlier revision
+ * of this file): without it, ApplyBQSR emits full-precision recalibrated
+ * quality scores -- much higher entropy per base than Sarek's original
+ * (often pre-binned) qualities -- which was bloating recalibrated CRAMs to
+ * 1.3-3.5x the size of the markduplicates input. This is the same binning
+ * Broad's own WARP/Terra pipeline applies, per the published Functional
+ * Equivalence spec (Regier et al. 2018); GATK's own docs say it has no
+ * noticeable effect on germline variant discovery at these levels.
  *
  * This is main_2.nf -- an alternate, scatter/gathered version kept
  * side-by-side with the original single-shot main.nf for comparison before
@@ -70,45 +74,49 @@ process CREATE_SEQUENCE_GROUPING {
     '''
     set -euxo pipefail
 
+    # NOTE: unlike WDL's command <<< >>>, Nextflow's shell block does NOT
+    # strip common leading whitespace -- everything below must be flush
+    # left (true Python top-level indentation), or the interpreter sees a
+    # bogus leading indent and fails immediately.
     python3 <<'CODE'
-    with open("!{ref_dict}") as fh:
-        sequence_tuples = []
-        for line in fh:
-            if line.startswith("@SQ"):
-                fields = line.split("\t")
-                name = fields[1].split("SN:")[1]
-                length = int(fields[2].split("LN:")[1])
-                sequence_tuples.append((name, length))
+with open("!{ref_dict}") as fh:
+    sequence_tuples = []
+    for line in fh:
+        if line.startswith("@SQ"):
+            fields = line.split("\\t")
+            name = fields[1].split("SN:")[1]
+            length = int(fields[2].split("LN:")[1])
+            sequence_tuples.append((name, length))
 
-    longest = max(length for _, length in sequence_tuples)
-    # Sacrificial ":1+" suffix on every contig name -- workaround for an old
-    # GATK bug that strips text after a colon in some contig names (hg38
-    # ALT contigs). "chr1:1+" means "chr1, from position 1 to the end", so
-    # this is semantically a no-op interval, just spelled so every contig
-    # (colon-bearing or not) is parsed the same way. Kept for fidelity with
-    # the reference pipeline; may be unnecessary on modern GATK versions.
-    protection_tag = ":1+"
+longest = max(length for _, length in sequence_tuples)
+# Sacrificial ":1+" suffix on every contig name -- workaround for an old
+# GATK bug that strips text after a colon in some contig names (hg38
+# ALT contigs). "chr1:1+" means "chr1, from position 1 to the end", so
+# this is semantically a no-op interval, just spelled so every contig
+# (colon-bearing or not) is parsed the same way. Kept for fidelity with
+# the reference pipeline; may be unnecessary on modern GATK versions.
+protection_tag = ":1+"
 
-    groups = []
-    current = [sequence_tuples[0][0] + protection_tag]
-    current_size = sequence_tuples[0][1]
-    for name, length in sequence_tuples[1:]:
-        if current_size + length <= longest:
-            current.append(name + protection_tag)
-            current_size += length
-        else:
-            groups.append(current)
-            current = [name + protection_tag]
-            current_size = length
-    groups.append(current)
+groups = []
+current = [sequence_tuples[0][0] + protection_tag]
+current_size = sequence_tuples[0][1]
+for name, length in sequence_tuples[1:]:
+    if current_size + length <= longest:
+        current.append(name + protection_tag)
+        current_size += length
+    else:
+        groups.append(current)
+        current = [name + protection_tag]
+        current_size = length
+groups.append(current)
 
-    with open("sequence_grouping.tsv", "w") as fh:
-        fh.write("\n".join("\t".join(g) for g in groups))
+with open("sequence_grouping.tsv", "w") as fh:
+    fh.write("\\n".join("\\t".join(g) for g in groups))
 
-    groups_with_unmapped = groups + [["unmapped"]]
-    with open("sequence_grouping_with_unmapped.tsv", "w") as fh:
-        fh.write("\n".join("\t".join(g) for g in groups_with_unmapped))
-    CODE
+groups_with_unmapped = groups + [["unmapped"]]
+with open("sequence_grouping_with_unmapped.tsv", "w") as fh:
+    fh.write("\\n".join("\\t".join(g) for g in groups_with_unmapped))
+CODE
 
     test -s sequence_grouping.tsv
     test -s sequence_grouping_with_unmapped.tsv
@@ -222,6 +230,7 @@ process GATK4_APPLYBQSR {
         -I !{cram} \
         -R !{ref_fasta} \
         --bqsr-recal-file !{recal_table} \
+        --static-quantized-quals 10 --static-quantized-quals 20 --static-quantized-quals 30 \
         !{interval_args} \
         -O !{sample_id}.!{group_tag}.recal.cram \
         --tmp-dir .
