@@ -119,6 +119,30 @@ process GATK4_APPLYBQSR {
     '''
 }
 
+process WRITE_SAMPLESHEET {
+    tag "samplesheet"
+    label 'process_low'
+    container "quay.io/biocontainers/samtools:1.20--h50ea8bc_0"
+    publishDir "${params.outdir}", mode: 'copy'
+    errorStrategy 'retry'
+    maxRetries 2
+
+    input:
+    val csv_content
+
+    output:
+    path "samplesheet.csv", emit: samplesheet
+
+    shell:
+    '''
+    cat > samplesheet.csv << 'CSV_EOF'
+!{csv_content}
+CSV_EOF
+
+    test -s samplesheet.csv
+    '''
+}
+
 workflow {
 
     if (!params.bqsr_runs) {
@@ -163,4 +187,29 @@ workflow {
         applybqsr_inputs,
         ref_fasta, ref_fai, ref_dict
     )
+
+    // -----------------------------------------------------------------------
+    // Collect every sample's [sample_id, cram, crai] into one list, then emit
+    // the samplesheet once all recalibrations have finished -- .collect()
+    // forces this to wait for every GATK4_APPLYBQSR call to complete first.
+    // -----------------------------------------------------------------------
+
+    samplesheet_rows =
+    GATK4_APPLYBQSR
+        .out
+        .recal_cram
+        .map { sample_id, cram, crai -> [sample_id, cram, crai] }
+        .collect(flat: false)
+
+    samplesheet_content =
+        samplesheet_rows.map { rows ->
+            def lines = ["sample,file"]
+            rows.each { sample_id, cram, crai ->
+                lines << "${sample_id},${params.outdir}/${sample_id}/${sample_id}.recal.cram"
+                lines << "${sample_id},${params.outdir}/${sample_id}/${sample_id}.recal.cram.crai"
+            }
+            lines.join("\n")
+        }
+
+    WRITE_SAMPLESHEET(samplesheet_content)
 }

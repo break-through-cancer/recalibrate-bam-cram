@@ -286,6 +286,30 @@ process GATHER_ALIGNMENT_FILES {
     '''
 }
 
+process WRITE_SAMPLESHEET {
+    tag "samplesheet"
+    label 'process_low'
+    container "quay.io/biocontainers/samtools:1.20--h50ea8bc_0"
+    publishDir "${params.outdir}", mode: 'copy'
+    errorStrategy 'retry'
+    maxRetries 2
+
+    input:
+    val csv_content
+
+    output:
+    path "samplesheet.csv", emit: samplesheet
+
+    shell:
+    '''
+    cat > samplesheet.csv << 'CSV_EOF'
+!{csv_content}
+CSV_EOF
+
+    test -s samplesheet.csv
+    '''
+}
+
 workflow {
 
     if (!params.bqsr_runs) {
@@ -384,4 +408,32 @@ workflow {
             }
 
     GATHER_ALIGNMENT_FILES(shards_by_sample)
+
+    // -----------------------------------------------------------------------
+    // Collect every sample's recalibrated output into one list, then emit
+    // the samplesheet once all gathers have finished -- .collect() forces
+    // this to wait for every GATHER_ALIGNMENT_FILES call to complete first.
+    // -----------------------------------------------------------------------
+
+    samplesheet_rows =
+    GATHER_ALIGNMENT_FILES
+        .out
+        .recal_alignment
+        .map { sample_id, file, idx_file ->
+            def index_ext = params.output_format == 'cram' ? '.crai' : '.bai'
+            [sample_id, file, idx_file.toString().replaceAll(/.*\Q${index_ext}\E$/, index_ext)]
+        }
+        .collect(flat: false)
+
+    samplesheet_content =
+        samplesheet_rows.map { rows ->
+            def lines = ["sample,file"]
+            rows.each { sample_id, file, idx_file ->
+                lines << "${sample_id},${params.outdir}/${sample_id}/${file.name}"
+                lines << "${sample_id},${params.outdir}/${sample_id}/${file.name}${params.output_format == 'cram' ? '.crai' : '.bai'}"
+            }
+            lines.join("\n")
+        }
+
+    WRITE_SAMPLESHEET(samplesheet_content)
 }
