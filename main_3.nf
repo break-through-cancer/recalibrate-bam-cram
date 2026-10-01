@@ -254,7 +254,7 @@ process GATK4_APPLYBQSR {
 
 process GATHER_ALIGNMENT_FILES {
     tag "${sample_id}"
-    label 'process_medium'
+    label 'process_high'
     container "broadinstitute/gatk:4.5.0.0"
     publishDir "${params.outdir}/${sample_id}", mode: 'copy'
     errorStrategy 'retry'
@@ -276,7 +276,9 @@ process GATHER_ALIGNMENT_FILES {
     # block-concatenation semantics in the reference pipeline. Works
     # identically for BAM or CRAM shards; samtools infers the output
     # container format from the -o filename's extension, same as GATK does.
-    samtools cat -o !{sample_id}.recal.!{output_format} !{shards}
+    # Use -b with a file list for memory efficiency with many input files.
+    printf '%s\\n' !{shards} > file_list.txt
+    samtools cat -b file_list.txt -o !{sample_id}.recal.!{output_format}
 
     # samtools index picks .bai (BAM) or .crai (CRAM) based on the input
     # file's own format -- no extra flag needed either way.
