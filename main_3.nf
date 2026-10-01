@@ -254,7 +254,6 @@ process GATK4_APPLYBQSR {
 
 process GATHER_ALIGNMENT_FILES {
     tag "${sample_id}"
-    label 'process_high'
     container "broadinstitute/gatk:4.5.0.0"
     publishDir "${params.outdir}/${sample_id}", mode: 'copy'
     errorStrategy 'retry'
